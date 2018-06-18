@@ -1,0 +1,5 @@
+1. Config file to parameterize
+    a. Auto mount
+    b. Folders to back up
+    c. Destination folder
+2. backup --init should run Borg init (and generate a password?)

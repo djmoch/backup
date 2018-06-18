@@ -1,0 +1,6 @@
+[Unit]
+Description=Backup service
+
+[Service]
+Type=simple
+ExecStart=/root/bin/backup

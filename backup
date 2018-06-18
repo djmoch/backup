@@ -1,0 +1,62 @@
+#!/bin/sh
+OUTPUT=/var/log/tc_backup.log
+if [ $EUID -ne 0 ]
+then
+    echo "`date`: Must be run as root" >> $OUTPUT
+    exit 1
+fi
+TC_MOUNTPOINT=/mnt/timecapsule
+TC_SERVER=timecapsule.djmoch.org
+PASSFILE=/root/secret/ft
+
+__cleanup()
+{
+    if [ -n "$TC_MOUNTED" ]
+    then
+        umount $TC_MOUNTPOINT
+        echo "Time Capsule unmounted" >> $OUTPUT
+        unset TC_MOUNTED
+    fi
+}
+
+
+echo "Beginning backup: `date`" >> $OUTPUT
+
+# Only do the following if server is reachable
+starttime=`date '+%s'`
+runningtime=0
+while [ $runningtime -le 120 ]
+do
+    if ping -c 1 danielmoch.com > /dev/null 2>&1
+    then
+	connected=1
+	break
+    fi
+    sleep 1
+    runningtime=$((`date '+%s'` - $starttime))
+done
+
+if [ -n "$connected" ]
+then
+    echo "$TC_SERVER reachable. Proceeding." >> $OUTPUT
+else
+    echo "$TC_SERVER NOT reachable. Exiting." >> $OUTPUT
+    echo "Ending backup: `date`" >> $OUTPUT
+    exit -1
+fi
+
+if mount $TC_MOUNTPOINT >> $OUTPUT 2>&1
+then
+    echo "Time Capsule successfully mounted" >> $OUTPUT
+    TC_MOUNTED=1
+else
+    echo "Time Capsule mount FAILED. Quitting." >> $OUTPUT
+    echo "Ending backup: `date`" >> $OUTPUT
+    exit -2
+fi
+
+BORG_PASSPHRASE=`cat $PASSFILE` borg create --stats /mnt/timecapsule/$HOSTNAME.borg::`date '+%Y%m%d'` /etc /root /home >> $OUTPUT 2>&1
+
+df | grep "Filesystem\|$TC_MOUNTPOINT" >> $OUTPUT
+__cleanup
+echo "Ending backup: `date`" >> $OUTPUT
