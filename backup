@@ -1,5 +1,5 @@
 #!/bin/sh
-[ -n "$BACKUP_OUTPUT" ] && exec 1> $BACKUP_OUTPUT 2>&1
+[ -n "$BACKUP_OUTPUT" ] && exec > $BACKUP_OUTPUT 2>&1
 if [ $EUID -ne 0 ]
 then
     echo "`date`: Must be run as root"
@@ -11,7 +11,7 @@ __cleanup()
     if [ -n "$BACKUP_MOUNTED" ]
     then
         umount $BACKUP_MOUNTPOINT
-        echo "Time Capsule unmounted"
+        echo "Backup location mounted"
         unset BACKUP_MOUNTED
     fi
 }
@@ -45,14 +45,18 @@ then
     fi
 fi
 
-if mount $BACKUP_MOUNTPOINT 2>&1
+if [ -n "$BACKUP_MOUNTPOINT" ]
 then
-    echo "Time Capsule successfully mounted"
-    BACKUP_MOUNTED=1
-else
-    echo "Time Capsule mount FAILED. Quitting."
-    echo "Ending backup: `date`"
-    exit -2
+    if mount "$BACKUP_MOUNTPOINT" 2>&1
+    then
+        echo "Backup location successfully mounted"
+        BACKUP_MOUNTED=1
+    else
+        echo "Backup location mount FAILED. Confirm entry in /etc/fstab."
+        echo "Quitting."
+        echo "Ending backup: `date`"
+        exit -2
+    fi
 fi
 
 BORG_PASSPHRASE=`cat $PASSFILE` borg create --stats \
