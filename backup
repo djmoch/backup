@@ -59,10 +59,9 @@ then
     fi
 fi
 
-BORG_PASSPHRASE=`cat $PASSFILE` borg create --stats \
+BORG_PASSPHRASE=`cat $PASSFILE` borg create \
     $BACKUP_MOUNTPOINT/$HOSTNAME.borg::`date '+%Y%m%d'` \
     $BACKUP_FOLDERS 2>&1
 
-df | grep "Filesystem\|$BACKUP_MOUNTPOINT"
 __cleanup
 echo "Ending backup: `date`"
