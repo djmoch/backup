@@ -8,9 +8,8 @@ BACKUP_SERVER_WAIT=120
 
 while [ -n "$1" ]
 do
-    [ "$1" = "-c" ] && shift && BACKUP_CONFIG=$1
+    [ "$1" = "-c" ] && shift && BACKUP_CONFIG=$1 && shift
     [ "$1" = "-i" ] && shift && BACKUP_INIT=1
-    shift
 done
 
 [ -f "$BACKUP_CONFIG" ] && . "$BACKUP_CONFIG"
@@ -18,7 +17,7 @@ done
 [ -n "$BACKUP_OUTPUT" ] && exec > $BACKUP_OUTPUT 2>&1
 if [ $EUID -ne 0 ]
 then
-    echo "`date`: Must be run as root" > &2
+    echo "`date`: Must be run as root" >&2
     exit 1
 fi
 
@@ -81,7 +80,7 @@ then
         borg init --encryption=authenticated "$BACKUP_DEST"
 fi
 
-BORG_PASSPHRASE=$BACKUP_PASSWORD borg create \
+BORG_PASSPHRASE=$BACKUP_PASSWORD borg create --stats \
     $BACKUP_DEST::`date '+%Y%m%d'` \
     $BACKUP_FOLDERS 2>&1
 
