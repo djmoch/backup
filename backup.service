@@ -3,4 +3,4 @@ Description=Backup service
 
 [Service]
 Type=simple
-ExecStart=/root/bin/backup
+ExecStart=/usr/lib/backup/backup

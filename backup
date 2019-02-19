@@ -1,13 +1,15 @@
 #!/bin/sh
+# vim: set sts=4 sw=4 et:
 BACKUP_CONFIG=/etc/backup/config
-BACKUP_PASSFILE=/etc/backup/passwd
-BACKUP_DEST=/var/backup
+BACKUP_PASSWORD="<changeme>"
+BACKUP_DEST=/var/lib/backup
 BACKUP_FOLDERS=/etc\ /root\ /home
+BACKUP_SERVER_WAIT=120
 
 while [ -n "$1" ]
 do
     [ "$1" = "-c" ] && shift && BACKUP_CONFIG=$1
-    [ "$1" = "-i" ] && shift && BACKUP_INIT=1 && BORG_PASSPHRASE=$1
+    [ "$1" = "-i" ] && shift && BACKUP_INIT=1
     shift
 done
 
@@ -16,7 +18,7 @@ done
 [ -n "$BACKUP_OUTPUT" ] && exec > $BACKUP_OUTPUT 2>&1
 if [ $EUID -ne 0 ]
 then
-    echo "`date`: Must be run as root"
+    echo "`date`: Must be run as root" > &2
     exit 1
 fi
 
@@ -25,7 +27,7 @@ __cleanup()
     if [ -n "$BACKUP_MOUNTED" ]
     then
         umount $BACKUP_MOUNTPOINT
-        echo "Backup location mounted"
+        echo "Backup location unmounted"
         unset BACKUP_MOUNTED
     fi
 }
@@ -38,7 +40,7 @@ if [ -n "$BACKUP_SERVER" ]
 then
     starttime=`date '+%s'`
     runningtime=0
-    while [ $runningtime -le 120 ]
+    while [ $runningtime -le $BACKUP_SERVER_WAIT ]
     do
         if ping -c 1 $BACKUP_SERVER > /dev/null 2>&1
         then
@@ -53,7 +55,7 @@ then
     then
         echo "$BACKUP_SERVER reachable. Proceeding."
     else
-        echo "$BACKUP_SERVER NOT reachable. Exiting."
+        echo "$BACKUP_SERVER NOT reachable. Exiting." >&2
         echo "Ending backup: `date`"
         exit -1
     fi
@@ -66,7 +68,7 @@ then
         echo "Backup location successfully mounted"
         BACKUP_MOUNTED=1
     else
-        echo "Backup location mount FAILED. Confirm entry in /etc/fstab."
+        echo "Backup location mount FAILED. Confirm entry in /etc/fstab." >&2
         echo "Quitting."
         echo "Ending backup: `date`"
         exit -2
@@ -75,11 +77,11 @@ fi
 
 if [ -n "$BACKUP_INIT" ]
 then
-    echo "$BORG_PASSPHRASE" > $BACKUP_PASSFILE
-    borg init --encryption=authenticated "$BACKUP_DEST"
+    BORG_PASSPHRASE=$BACKUP_PASSWORD \
+        borg init --encryption=authenticated "$BACKUP_DEST"
 fi
 
-BORG_PASSPHRASE=`cat $BACKUP_PASSFILE` borg create \
+BORG_PASSPHRASE=$BACKUP_PASSWORD borg create \
     $BACKUP_DEST::`date '+%Y%m%d'` \
     $BACKUP_FOLDERS 2>&1
 

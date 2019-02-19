@@ -1,6 +1,30 @@
+# vim: set ft=sh sts=4 sw=4 et:
+
+# A file to write stdout and stderr to. If running as a systemd service, then
+# leaving this unset should have all output logged to the journal.
 #BACKUP_OUTPUT=
+
+# Will attempt to mount the following location before running the backup.
+# NOTE: BACKUP_MOUNTPOINT MUST BE DEFINED IN /etc/fstab FOR THIS TO WORK!!
 #BACKUP_MOUNTPOINT=
+
+# To provide graceful handling of cases where backups are being stored on a
+# remote server, the script checks for connectivity to BACKUP_SERVER before
+# mounting BACKUP_MOUNTPOINT. If not backing up to a remote server, then leave
+# this unset.
 #BACKUP_SERVER=
-#BACKUP_PASSFILE=
+
+# The timeout (in seconds) to wait for server connectivity before giving up.
+#BACKUP_SERVER_WAIT=
+
+# The backup password.
+# NOTE: BECAUSE THIS IS STORED IN PLAINTEXT, THIS FILE SHOULD ONLY BE READABLE
+# BY root!
+#BACKUP_PASSWORD=
+
+# The full path of the folder to store the backup. (This folder will be created
+# upon initialization if it doesn't already exist.)
 #BACKUP_DEST=
+
+# The folders to back up (each entry is recursive)
 #BACKUP_FOLDERS=
