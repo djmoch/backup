@@ -1,0 +1,6 @@
+TODO
+====
+
+- "backup init" should run Borg init (and generate a password?)
+
+- Makefile needs a target to install systemd files

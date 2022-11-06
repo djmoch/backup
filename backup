@@ -1,6 +1,6 @@
 #!/bin/sh
 # vim: set sts=4 sw=4 et:
-BACKUP_CONFIG=/etc/backup/config
+BACKUP_CONFIG=/etc/backup
 BACKUP_PASSWORD="<changeme>"
 BACKUP_DEST=/var/lib/backup
 BACKUP_FOLDERS=/etc\ /root\ /home
