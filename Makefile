@@ -32,6 +32,6 @@ dist:
 	tar cf - backup-${VERSION} | gzip > backup-${VERSION}.tar.gz
 
 distclean:
-	rm -f backup-*
+	rm -rf backup-*
 
 .PHONY: all install uninstall
