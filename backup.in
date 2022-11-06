@@ -1,10 +1,6 @@
 #!/bin/sh
-# vim: set sts=4 sw=4 et:
-BACKUP_CONFIG=/etc/backup
-BACKUP_PASSWORD="<changeme>"
-BACKUP_DEST=/var/lib/backup
-BACKUP_FOLDERS=/etc\ /root\ /home
-BACKUP_SERVER_WAIT=120
+
+BACKUP_CONFIG="{{ config_path }}"
 
 while [ -n "$1" ]
 do
@@ -15,7 +11,7 @@ done
 [ -f "$BACKUP_CONFIG" ] && . "$BACKUP_CONFIG"
 
 [ -n "$BACKUP_OUTPUT" ] && exec > $BACKUP_OUTPUT 2>&1
-if [ $EUID -ne 0 ]
+if [ $(id -u) -ne 0 ]
 then
     echo "`date`: Must be run as root" >&2
     exit 1

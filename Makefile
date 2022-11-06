@@ -5,7 +5,7 @@ VERSION = 1.0.1-dev0
 
 DIST_SRC = \
 	Makefile \
-	backup \
+	backup.in \
 	backup.service \
 	backup.timer \
 	config \
@@ -16,9 +16,17 @@ PREFIX = /usr/local
 LIBEXECDIR = ${PREFIX}/libexec
 SYSCONFDIR = /etc
 
-all: install
+all: build
 
-install:
+build: backup
+
+clean:
+	rm -f backup
+
+backup: backup.in
+	sed 's~{{ config_path }}~${SYSCONFDIR}/backup~' backup.in > backup
+
+install: build
 	install -Dm755 backup ${DESTDIR}${LIBEXECDIR}/backup/backup
 	install -Dm600 config ${DESTDIR}${SYSCONFDIR}/backup
 
@@ -34,4 +42,4 @@ dist:
 distclean:
 	rm -rf backup-*
 
-.PHONY: all install uninstall
+.PHONY: all build clean install uninstall dist distclean
