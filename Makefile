@@ -1,7 +1,7 @@
 # See LICENSE file for copyright and license information
 .POSIX:
 
-VERSION = 1.0.0-dev0
+VERSION = 1.0.0
 
 DIST_SRC = \
 	Makefile \
